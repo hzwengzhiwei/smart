@@ -311,3 +311,73 @@ func PrintSMARTPage(smart SmartPage, drive drivedb.DriveModel, w io.Writer) {
 			attrUpdated, formatRawValue(rawValue, conv.Conv))
 	}
 }
+
+type SmartPageInfo struct {
+	Version uint16
+	Attrs   []smartAttrInfo
+}
+
+type smartAttrInfo struct {
+	ID             uint8
+	ATTRIBUTE_NAME string
+	FLAG           uint16
+	VALUE          uint8
+	WORST          uint8
+	RESERVED       uint8
+	TYPE           string
+	UPDATED        string
+	RAW_VALUE      string
+}
+
+func GetSMARTPage(smart SmartPage, drive drivedb.DriveModel) *SmartPageInfo {
+	s := &SmartPageInfo{}
+	s.Version = smart.Version
+
+	for _, attr := range smart.Attrs {
+		var (
+			rawValue              uint64
+			conv                  drivedb.AttrConv
+			attrType, attrUpdated string
+		)
+
+		if attr.Id == 0 {
+			break
+		}
+
+		conv, ok := drive.Presets[strconv.Itoa(int(attr.Id))]
+		if ok {
+			rawValue = attr.decodeVendorBytes(conv.Conv)
+		}
+
+		// Pre-fail / advisory bit
+		if attr.Flags&0x0001 != 0 {
+			attrType = "Pre-fail"
+		} else {
+			attrType = "Old_age"
+		}
+
+		// Online data collection bit
+		if attr.Flags&0x0002 != 0 {
+			attrUpdated = "Always"
+		} else {
+			attrUpdated = "Offline"
+		}
+		a := smartAttrInfo{
+			ID:             attr.Id,
+			ATTRIBUTE_NAME: conv.Name,
+			FLAG:           attr.Flags,
+			VALUE:          attr.Value,
+			WORST:          attr.Worst,
+			RESERVED:       attr.Reserved,
+			TYPE:           attrType,
+			UPDATED:        attrUpdated,
+			RAW_VALUE:      formatRawValue(rawValue, conv.Conv),
+		}
+		// fmt.Fprintf(w, "%3d %-24s %#04x   %03d   %03d   %03d      %-8s %-7s %s\n",
+		// 	attr.Id, conv.Name, attr.Flags, attr.Value, attr.Worst, attr.Reserved, attrType,
+		// 	attrUpdated, formatRawValue(rawValue, conv.Conv))
+		fmt.Println(a)
+		s.Attrs = append(s.Attrs, a)
+	}
+	return s
+}
