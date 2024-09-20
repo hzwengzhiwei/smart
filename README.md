@@ -20,3 +20,8 @@ References
 * http://www.t13.org/documents/UploadedDocuments/docs2016/di529r14-ATAATAPI_Command_Set_-_4.pdf
 * http://www.nvmexpress.org/wp-content/uploads/NVM_Express_Revision_1.3.pdf
 * And many more listed in https://en.wikipedia.org/wiki/S.M.A.R.T.#References
+
+---
+# 更新说明
+1. megaraid/megaraid.go添加了`GetHostNumDeviceID`
+2. megaraid/megaraid.go添加了`OpenMegasasIoctlMegaSmart`
