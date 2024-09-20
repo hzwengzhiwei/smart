@@ -141,6 +141,72 @@ type MegasasDevice struct {
 	ctl      *MegasasIoctl
 }
 
+type MegaSmart struct {
+	SerialNumber     string              `json:"serial_num"`
+	FirmwareRevision string              `json:"firmware_revision"`
+	ModelNumber      string              `json:"model_number"`
+	SmartPage        *ata.SmartPage      `json:"smart_page"`
+	Drive            *drivedb.DriveModel `json:"drive"`
+}
+
+// return MegaSmart
+func OpenMegasasIoctlMegaSmart(host uint16, diskNum uint8) (*MegaSmart, error) {
+	var respBuf []byte
+
+	m, _ := CreateMegasasIoctl()
+	defer m.Close()
+
+	// Send ATA IDENTIFY command as a CDB16 passthru command
+	cdb := scsi.CDB16{scsi.SCSI_ATA_PASSTHRU_16}
+	cdb[1] = 0x08                     // ATA protocol (4 << 1, PIO data-in)
+	cdb[2] = 0x0e                     // BYT_BLOK = 1, T_LENGTH = 2, T_DIR = 1
+	cdb[14] = ata.ATA_IDENTIFY_DEVICE // command
+	respBuf = make([]byte, 512)
+
+	if err := m.PassThru(host, diskNum, cdb[:], respBuf, scsi.SG_DXFER_FROM_DEV); err != nil {
+		return nil, err
+	}
+
+	ident_buf := ata.IdentifyDeviceData{}
+	binary.Read(bytes.NewBuffer(respBuf), utils.NativeEndian, &ident_buf)
+
+	db, err := drivedb.OpenDriveDb("drivedb.yaml")
+	if err != nil {
+		return nil, err
+	}
+
+	thisDrive := db.LookupDrive(ident_buf.ModelNumber())
+
+	// Send ATA SMART READ command as a CDB16 passthru command
+	cdb = scsi.CDB16{scsi.SCSI_ATA_PASSTHRU_16}
+	cdb[1] = 0x08                // ATA protocol (4 << 1, PIO data-in)
+	cdb[2] = 0x0e                // BYT_BLOK = 1, T_LENGTH = 2, T_DIR = 1
+	cdb[4] = ata.SMART_READ_DATA // feature LSB
+	cdb[10] = 0x4f               // low lba_mid
+	cdb[12] = 0xc2               // low lba_high
+	cdb[14] = ata.ATA_SMART      // command
+	respBuf = make([]byte, 512)
+
+	if err := m.PassThru(host, diskNum, cdb[:], respBuf, scsi.SG_DXFER_FROM_DEV); err != nil {
+		return nil, err
+	}
+
+	smart := &ata.SmartPage{}
+	binary.Read(bytes.NewBuffer(respBuf[:362]), utils.NativeEndian, &smart)
+
+	ms := &MegaSmart{
+		SerialNumber:     string(ident_buf.SerialNumber()),
+		FirmwareRevision: string(ident_buf.FirmwareRevision()),
+		ModelNumber:      string(ident_buf.ModelNumber()),
+		SmartPage:        smart,
+		Drive:            &thisDrive,
+	}
+	// ata.PrintSMARTPage(smart, thisDrive, os.Stdout)
+	// fmt.Println(ms)
+
+	return ms, nil
+}
+
 var (
 	// 0xc1944d01 - Beware: cannot use unsafe.Sizeof(megasas_iocpacket{}) due to Go struct padding!
 	MEGASAS_IOC_FIRMWARE = ioctl.Iowr('M', 1, uintptr(binary.Size(megasas_iocpacket{})))
@@ -346,6 +412,11 @@ func (d *MegasasDevice) inquiry() scsi.InquiryResponse {
 
 	binary.Read(bytes.NewReader(respBuf), utils.NativeEndian, &inqBuf)
 	return inqBuf
+}
+
+// return MegasasDevice hostNum and deviceId
+func (d *MegasasDevice) GetHostNumDeviceID() (uint16, uint16) {
+	return d.hostNum, d.deviceId
 }
 
 func OpenMegasasIoctl(host uint16, diskNum uint8) error {
