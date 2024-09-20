@@ -329,7 +329,7 @@ type smartAttrInfo struct {
 	RAW_VALUE      string
 }
 
-func GetSMARTPage(smart SmartPage, drive drivedb.DriveModel) *SmartPageInfo {
+func GetSMARTPage(smart *SmartPage, drive drivedb.DriveModel) *SmartPageInfo {
 	s := &SmartPageInfo{}
 	s.Version = smart.Version
 

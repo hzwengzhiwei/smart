@@ -201,6 +201,7 @@ func OpenMegasasIoctlMegaSmart(host uint16, diskNum uint8) (*MegaSmart, error) {
 		SmartPage:        smart,
 		Drive:            &thisDrive,
 	}
+	ata.GetSMARTPage(smart, thisDrive)
 	// ata.PrintSMARTPage(smart, thisDrive, os.Stdout)
 	// fmt.Println(ms)
 
