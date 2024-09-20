@@ -26,7 +26,7 @@ import (
 
 	"golang.org/x/sys/unix"
 
-	"github.com/dswarbrick/smart"
+	"github.com/hzwengzhiwei/smart"
 	"github.com/dswarbrick/smart/drivedb"
 	"github.com/dswarbrick/smart/megaraid"
 	"github.com/dswarbrick/smart/nvme"
