@@ -13,7 +13,6 @@
 // limitations under the License.
 
 // Go SMART library smartctl reference implementation.
-//
 package main
 
 import (
@@ -27,10 +26,10 @@ import (
 	"golang.org/x/sys/unix"
 
 	"github.com/hzwengzhiwei/smart"
-	"github.com/dswarbrick/smart/drivedb"
-	"github.com/dswarbrick/smart/megaraid"
-	"github.com/dswarbrick/smart/nvme"
-	"github.com/dswarbrick/smart/scsi"
+	"github.com/hzwengzhiwei/smart/drivedb"
+	"github.com/hzwengzhiwei/smart/megaraid"
+	"github.com/hzwengzhiwei/smart/nvme"
+	"github.com/hzwengzhiwei/smart/scsi"
 )
 
 const (

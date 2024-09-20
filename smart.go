@@ -13,13 +13,12 @@
 // limitations under the License.
 
 // Package smart is a pure Go SMART library.
-//
 package smart
 
 import (
 	"path/filepath"
 
-	"github.com/dswarbrick/smart/scsi"
+	"github.com/hzwengzhiwei/smart/scsi"
 )
 
 // TODO: Make this discover NVMe and MegaRAID devices also.

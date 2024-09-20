@@ -19,7 +19,7 @@ package nvme
 import (
 	"io"
 
-	"github.com/dswarbrick/smart/drivedb"
+	"github.com/hzwengzhiwei/smart/drivedb"
 
 	"github.com/dswarbrick/go-nvme/nvme"
 )

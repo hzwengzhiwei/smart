@@ -33,11 +33,11 @@ import (
 
 	"golang.org/x/sys/unix"
 
-	"github.com/dswarbrick/smart/ata"
-	"github.com/dswarbrick/smart/drivedb"
-	"github.com/dswarbrick/smart/ioctl"
-	"github.com/dswarbrick/smart/scsi"
-	"github.com/dswarbrick/smart/utils"
+	"github.com/hzwengzhiwei/smart/ata"
+	"github.com/hzwengzhiwei/smart/drivedb"
+	"github.com/hzwengzhiwei/smart/ioctl"
+	"github.com/hzwengzhiwei/smart/scsi"
+	"github.com/hzwengzhiwei/smart/utils"
 )
 
 const (
