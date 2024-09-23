@@ -25,3 +25,4 @@ References
 # 更新说明
 1. megaraid/megaraid.go添加了`GetHostNumDeviceID`
 2. megaraid/megaraid.go添加了`OpenMegasasIoctlMegaSmart`
+3. ata/smart.go添加了`GetSMARTPage`
